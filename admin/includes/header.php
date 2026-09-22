@@ -18,8 +18,10 @@
     <div class="container">
         <a class="navbar-brand" href="dashboard.php">🩺 Health Records Admin</a>
         <?php if (isset($_SESSION['admin_id'])): ?>
-        <div class="d-flex align-items-center">
-            <span class="text-white me-3">Hi, <?= htmlspecialchars($_SESSION['admin_username']) ?></span>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <a href="dashboard.php" class="btn btn-outline-light btn-sm">Records</a>
+            <a href="users.php" class="btn btn-outline-light btn-sm">Users</a>
+            <span class="text-white me-2">Hi, <?= htmlspecialchars($_SESSION['admin_username']) ?></span>
             <a href="logout.php" class="btn btn-outline-light btn-sm">Logout</a>
         </div>
         <?php endif; ?>
