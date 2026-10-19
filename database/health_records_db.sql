@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS admins (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO admins (username, password) VALUES
+INSERT IGNORE INTO admins (username, password) VALUES
 ('admin', '$2y$10$TIZsd2qtB.J7uaxya0EcP.q1ueyH3NL0PSO1WYq1vfaeBLObkHRqy');
 
 -- Registered application users managed by the admin panel
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-INSERT INTO users (full_name, email, username, password, role, status)
+INSERT IGNORE INTO users (full_name, email, username, password, role, status)
 VALUES
 ('Sample User', 'user@example.com', 'user', '$2y$10$fffibGCBhp3cyAlO0UM3IeuQZWzdgG.HadZi77A.j/dDtIhxyuNYi', 'User', 'Active');
 
@@ -46,4 +46,97 @@ CREATE TABLE IF NOT EXISTS patients (
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Previous patient record versions, captured before each edit
+CREATE TABLE IF NOT EXISTS patient_history (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    snapshot LONGTEXT NOT NULL,
+    changed_by VARCHAR(50) NOT NULL,
+    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_patient_history_patient_changed (patient_id, changed_at),
+    CONSTRAINT fk_patient_history_patient FOREIGN KEY (patient_id)
+        REFERENCES patients(id) ON DELETE CASCADE
+);
+
+-- Clinician-created laboratory requests linked to a patient record
+CREATE TABLE IF NOT EXISTS lab_requests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    consultation TEXT NOT NULL,
+    tests TEXT NOT NULL,
+    requested_by VARCHAR(100) NOT NULL,
+    requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('Requested','Completed','Cancelled') NOT NULL DEFAULT 'Requested',
+    INDEX idx_lab_requests_patient_requested (patient_id, requested_at),
+    CONSTRAINT fk_lab_requests_patient FOREIGN KEY (patient_id)
+        REFERENCES patients(id) ON DELETE CASCADE
+);
+
+-- Appointments belong to both a patient and the admin account calendar
+CREATE TABLE IF NOT EXISTS appointments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    account_id INT NOT NULL,
+    starts_at DATETIME NOT NULL,
+    duration_minutes SMALLINT UNSIGNED NOT NULL DEFAULT 30,
+    appointment_type ENUM('Face-to-face','Follow-up') NOT NULL DEFAULT 'Face-to-face',
+    reason TEXT NOT NULL,
+    status ENUM('Scheduled','Completed','Cancelled') NOT NULL DEFAULT 'Scheduled',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_appointments_account_start (account_id, starts_at),
+    INDEX idx_appointments_patient_start (patient_id, starts_at),
+    CONSTRAINT fk_appointments_patient FOREIGN KEY (patient_id)
+        REFERENCES patients(id) ON DELETE CASCADE,
+    CONSTRAINT fk_appointments_account FOREIGN KEY (account_id)
+        REFERENCES admins(id) ON DELETE CASCADE
+);
+
+-- Clinician-authored, printable medical certificate drafts
+CREATE TABLE IF NOT EXISTS medical_certificates (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    account_id INT NOT NULL,
+    examination_date DATE NOT NULL,
+    purpose VARCHAR(150) NOT NULL,
+    findings TEXT NOT NULL,
+    recommendation TEXT NOT NULL,
+    leave_from DATE NULL,
+    leave_to DATE NULL,
+    clinician_name VARCHAR(100) NOT NULL,
+    license_number VARCHAR(50) NULL,
+    issued_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_certificates_patient_issued (patient_id, issued_at),
+    INDEX idx_certificates_account_issued (account_id, issued_at),
+    CONSTRAINT fk_certificates_patient FOREIGN KEY (patient_id)
+        REFERENCES patients(id) ON DELETE CASCADE,
+    CONSTRAINT fk_certificates_account FOREIGN KEY (account_id)
+        REFERENCES admins(id) ON DELETE CASCADE
+);
+
+-- A patient account can access only its explicitly linked patient record
+CREATE TABLE IF NOT EXISTS patient_accounts (
+    user_id INT PRIMARY KEY,
+    patient_id INT NOT NULL UNIQUE,
+    linked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_patient_accounts_user FOREIGN KEY (user_id)
+        REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_patient_accounts_patient FOREIGN KEY (patient_id)
+        REFERENCES patients(id) ON DELETE CASCADE
+);
+
+-- Public doctor status and availability maintained by Doctor-role accounts
+CREATE TABLE IF NOT EXISTS doctor_availability (
+    doctor_id INT PRIMARY KEY,
+    status ENUM('At clinic','Available','Unavailable') NOT NULL DEFAULT 'Unavailable',
+    clinic_location VARCHAR(150) NULL,
+    weekly_schedule TEXT NULL,
+    status_message VARCHAR(255) NULL,
+    unavailable_from DATE NULL,
+    unavailable_to DATE NULL,
+    unavailable_note VARCHAR(255) NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_doctor_availability_user FOREIGN KEY (doctor_id)
+        REFERENCES users(id) ON DELETE CASCADE
 );

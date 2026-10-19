@@ -6,6 +6,12 @@ A PHP + MySQL (PDO) admin panel for managing patient health records, built for X
 - Admin login (session-based, bcrypt-hashed password)
 - Create, Read (list + view), Update, Delete patient records
 - Search patients by name
+- Review complete previous patient record versions after edits
+- Create and print clinician-authored laboratory requests from a patient's consultation
+- Schedule patient consultations to an account-specific calendar
+- Generate clinician-reviewed medical certificate drafts
+- Give linked patient accounts access to their own records, appointments, laboratory requests, certificates, and record history
+- Publish doctor clinic status, regular hours, and planned absences to patient accounts
 
 ## Setup (XAMPP)
 
@@ -18,7 +24,9 @@ A PHP + MySQL (PDO) admin panel for managing patient health records, built for X
 3. **Import the database**
    Open `http://localhost/phpmyadmin`, click **Import**, and select
    `database/health_records_db.sql`. This creates the `health_records_db` database with
-   two tables (`admins`, `patients`) and a default admin account.
+   the `admins`, `users`, `patients`, `patient_history`, `lab_requests`, `appointments`,
+   and `medical_certificates` tables. The seed accounts are skipped if they already exist,
+   so the script can be imported again to add missing tables to an existing installation.
 
 4. **Check the DB config**
    `config/database.php` is already set for the default XAMPP MySQL user (`root`, no password).
@@ -34,6 +42,18 @@ A PHP + MySQL (PDO) admin panel for managing patient health records, built for X
 
 ⚠️ Change this password (or add a new admin and delete this one) before using this with
 real patient data.
+
+## Patient History and Laboratory Requests
+- Editing a patient record saves the complete prior version and the admin account that made the change. Open a patient and expand **Previous Record Versions** to review it.
+- The patient detail page contains a laboratory request form. Consultation/diagnosis and notes are prefilled as clinical context; the clinician enters the tests to request and can print the saved request.
+- Tests are selected by the clinician; the application does not infer or recommend tests. History is stored in the local database and is not blockchain-backed.
+- Re-import `database/health_records_db.sql` in phpMyAdmin to add the new tables to an existing installation. Existing patient data is not dropped.
+- Schedule a face-to-face or follow-up appointment from a patient record. Appointments appear on the signed-in admin account's calendar, overlapping scheduled visits are rejected, and events can be marked completed or cancelled.
+- The calendar is internal to this application; it does not synchronize with Google Calendar or Outlook.
+- Generate a medical certificate draft from a patient record. Findings and recommendations are clinician-entered, and each printout states that it requires clinician verification and signature.
+- Admin accounts manage clinical records, appointments, and certificates. Doctor-role user accounts can publish availability but do not yet have access to clinical charts or appointment management.
+- In **Users → Edit**, an admin can link one User account to one patient record. The patient dashboard shows only that linked record; new accounts must be linked by clinic staff before records are visible.
+- Doctor-role accounts can sign in through the regular user login and publish status, clinic location/hours, public messages, and planned absence dates from **My availability**. Patients can view active doctors' published information on their dashboard.
 
 ## Project Structure
 ```
@@ -51,7 +71,13 @@ health_records/
 │   ├── dashboard.php       # READ: list + search
 │   ├── create.php          # CREATE
 │   ├── edit.php            # UPDATE
-│   ├── view.php            # READ: single record
+│   ├── view.php            # READ: patient details, history, and lab requests
+│   ├── lab_request_create.php
+│   ├── lab_request.php     # Printable laboratory request
+│   ├── appointment_create.php
+│   ├── calendar.php        # Account-specific appointment calendar
+│   ├── medical_certificate_create.php
+│   ├── medical_certificate.php
 │   ├── delete.php          # DELETE
 │   └── includes/
 │       ├── header.php

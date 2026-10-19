@@ -14,7 +14,8 @@ if ($id <= 0) {
 
 $stmt = $pdo->prepare("SELECT * FROM patients WHERE id = ?");
 $stmt->execute([$id]);
-$form = $stmt->fetch();
+$original = $stmt->fetch();
+$form = $original;
 
 if (!$form) {
     $_SESSION['flash'] = ['type' => 'danger', 'message' => 'Record not found.'];
@@ -33,19 +34,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($form['gender'] === '')        $errors[] = 'Gender is required.';
 
     if (empty($errors)) {
-        $stmt = $pdo->prepare("
+        $snapshot = json_encode($original, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $updateStmt = $pdo->prepare("
             UPDATE patients SET
                 full_name = ?, date_of_birth = ?, gender = ?, contact_number = ?, address = ?,
                 blood_type = ?, diagnosis = ?, allergies = ?, medications = ?, doctor_name = ?,
                 admission_date = ?, notes = ?
             WHERE id = ?
         ");
-        $stmt->execute([
-            $form['full_name'], $form['date_of_birth'], $form['gender'], $form['contact_number'],
-            $form['address'], $form['blood_type'], $form['diagnosis'], $form['allergies'],
-            $form['medications'], $form['doctor_name'], $form['admission_date'] ?: null,
-            $form['notes'], $id,
-        ]);
+        $pdo->beginTransaction();
+        try {
+            $historyStmt = $pdo->prepare(
+                "INSERT INTO patient_history (patient_id, snapshot, changed_by) VALUES (?, ?, ?)"
+            );
+            $historyStmt->execute([
+                $id,
+                $snapshot,
+                substr($_SESSION['admin_username'] ?? 'admin', 0, 50),
+            ]);
+            $updateStmt->execute([
+                $form['full_name'], $form['date_of_birth'], $form['gender'], $form['contact_number'],
+                $form['address'], $form['blood_type'], $form['diagnosis'], $form['allergies'],
+                $form['medications'], $form['doctor_name'], $form['admission_date'] ?: null,
+                $form['notes'], $id,
+            ]);
+            $pdo->commit();
+        } catch (Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
 
         $_SESSION['flash'] = ['type' => 'success', 'message' => 'Patient record updated successfully.'];
         header('Location: dashboard.php');
@@ -69,6 +86,7 @@ include __DIR__ . '/includes/header.php';
 <div class="card p-4">
     <form method="POST" action="edit.php?id=<?= $id ?>">
         <input type="hidden" name="id" value="<?= $id ?>">
+        <h2 class="h5 section-heading">Patient details</h2>
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">Full Name *</label>
@@ -105,6 +123,10 @@ include __DIR__ . '/includes/header.php';
                 <input type="text" name="address" class="form-control" value="<?= htmlspecialchars($form['address']) ?>">
             </div>
 
+            <div class="col-12 mt-4">
+                <h2 class="h5 section-heading">Clinical information</h2>
+                <p class="small text-muted">Update only information that has been confirmed by the patient or clinician.</p>
+            </div>
             <div class="col-md-6">
                 <label class="form-label">Diagnosis</label>
                 <textarea name="diagnosis" class="form-control" rows="2"><?= htmlspecialchars($form['diagnosis']) ?></textarea>

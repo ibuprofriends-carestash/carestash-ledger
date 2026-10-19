@@ -19,6 +19,25 @@ if (!$user) {
 
 $page_title = 'Edit User';
 $errors = [];
+$linkStmt = $pdo->prepare("SELECT patient_id FROM patient_accounts WHERE user_id = ?");
+$linkStmt->execute([$id]);
+$linkedPatientId = $linkStmt->fetchColumn();
+$linkedPatientId = $linkedPatientId === false ? '' : (string)$linkedPatientId;
+
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+$patientsStmt = $pdo->prepare("
+    SELECT p.id, p.full_name, p.date_of_birth
+    FROM patients p
+    LEFT JOIN patient_accounts pa ON pa.patient_id = p.id
+    WHERE pa.user_id IS NULL OR pa.user_id = ?
+    ORDER BY p.full_name
+");
+$patientsStmt->execute([$id]);
+$availablePatients = $patientsStmt->fetchAll();
+
 $form = [
     'full_name' => $user['full_name'],
     'email' => $user['email'],
@@ -63,6 +82,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'Password must be at least 6 characters long.';
     }
 
+    $postedToken = $_POST['csrf_token'] ?? '';
+    if (!is_string($postedToken) || !hash_equals($_SESSION['csrf_token'], $postedToken)) {
+        $errors[] = 'The request expired. Reload the page and try again.';
+    }
+
+    $requestedPatientId = trim($_POST['patient_id'] ?? '');
+    if ($requestedPatientId !== '') {
+        if (!ctype_digit($requestedPatientId) || $form['role'] !== 'User') {
+            $errors[] = 'Only a User account can be linked to a patient record.';
+        } else {
+            $patientCheck = $pdo->prepare("SELECT id FROM patients WHERE id = ?");
+            $patientCheck->execute([(int)$requestedPatientId]);
+            if (!$patientCheck->fetch()) {
+                $errors[] = 'Select an existing patient record.';
+            } else {
+                $ownerCheck = $pdo->prepare("SELECT user_id FROM patient_accounts WHERE patient_id = ?");
+                $ownerCheck->execute([(int)$requestedPatientId]);
+                $ownerId = $ownerCheck->fetchColumn();
+                if ($ownerId !== false && (int)$ownerId !== $id) {
+                    $errors[] = 'That patient record is already linked to another account.';
+                }
+            }
+        }
+    }
+
     if (empty($errors)) {
         $sql = "UPDATE users SET full_name = ?, email = ?, username = ?, role = ?, status = ?";
         $params = [
@@ -81,8 +125,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sql .= " WHERE id = ?";
         $params[] = $id;
 
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
+        $pdo->beginTransaction();
+        try {
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+
+            if ($requestedPatientId === '') {
+                $unlinkStmt = $pdo->prepare("DELETE FROM patient_accounts WHERE user_id = ?");
+                $unlinkStmt->execute([$id]);
+            } else {
+                $linkStmt = $pdo->prepare("
+                    INSERT INTO patient_accounts (user_id, patient_id) VALUES (?, ?)
+                    ON DUPLICATE KEY UPDATE patient_id = VALUES(patient_id)
+                ");
+                $linkStmt->execute([$id, (int)$requestedPatientId]);
+            }
+            $pdo->commit();
+        } catch (Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
 
         $_SESSION['flash'] = ['type' => 'success', 'message' => 'User updated successfully.'];
         header('Location: users.php');
@@ -105,6 +167,7 @@ include __DIR__ . '/includes/header.php';
 
 <div class="card p-4">
     <form method="POST" action="user_edit.php?id=<?= (int)$id ?>">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">Full Name *</label>
@@ -136,6 +199,18 @@ include __DIR__ . '/includes/header.php';
                     <option value="Active" <?= $form['status'] === 'Active' ? 'selected' : '' ?>>Active</option>
                     <option value="Inactive" <?= $form['status'] === 'Inactive' ? 'selected' : '' ?>>Inactive</option>
                 </select>
+            </div>
+            <div class="col-12">
+                <label class="form-label" for="patient_id">Linked patient record</label>
+                <select id="patient_id" name="patient_id" class="form-select">
+                    <option value="">No patient record linked</option>
+                    <?php foreach ($availablePatients as $patient): ?>
+                        <option value="<?= (int)$patient['id'] ?>" <?= (string)$patient['id'] === (string)($_POST['patient_id'] ?? $linkedPatientId) ? 'selected' : '' ?>>
+                            #<?= (int)$patient['id'] ?> · <?= htmlspecialchars($patient['full_name']) ?> · <?= htmlspecialchars($patient['date_of_birth']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <div class="form-text">Only this account will be able to see the linked patient's records and appointments.</div>
             </div>
         </div>
 
