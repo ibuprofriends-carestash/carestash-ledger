@@ -39,28 +39,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Login</title>
+    <title>Sign in - CareStash Health</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background: linear-gradient(135deg, #eaf3ff, #f9fbff);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .login-card {
-            width: 100%;
-            max-width: 420px;
-            border: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            border-radius: 16px;
-        }
-    </style>
+    <link href="assets/css/medical.css" rel="stylesheet">
 </head>
-<body>
-    <div class="card login-card p-4">
-        <h3 class="text-center mb-3">User Login</h3>
+<body class="medical-login-page">
+    <main class="medical-login-card">
+        <div class="text-center">
+            <p class="text-success fw-semibold text-uppercase small mb-1">CareStash Health</p>
+            <h1 class="h3 mb-2">Welcome back</h1>
+            <p class="text-muted mb-4">Sign in to view your health records and clinic updates.</p>
+        </div>
 
         <?php if ($success): ?>
             <div class="alert alert-success py-2"><?= htmlspecialchars($success) ?></div>
@@ -72,20 +61,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <form method="POST" action="login.php">
             <div class="mb-3">
-                <label class="form-label">Username or Email</label>
-                <input type="text" name="identifier" class="form-control" required autofocus>
+                <label class="form-label" for="identifier">Username or email</label>
+                <input id="identifier" type="text" name="identifier" class="form-control" autocomplete="username" required autofocus>
             </div>
             <div class="mb-3">
-                <label class="form-label">Password</label>
-                <input type="password" name="password" class="form-control" required>
+                <label class="form-label" for="password">Password</label>
+                <input id="password" type="password" name="password" class="form-control" autocomplete="current-password" required>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Login</button>
+            <button type="submit" class="btn btn-primary w-100 py-2">Sign in</button>
         </form>
 
         <div class="text-center mt-3">
-            <p class="mb-0">No account yet? <a href="register.php">Create one</a></p>
-            <p class="mt-2 mb-0"><a href="admin/login.php">Admin login</a></p>
+            <p class="mb-2">New to CareStash? <a href="register.php">Create an account</a></p>
+            <a class="small text-decoration-none" href="admin/login.php">Administrator sign in</a>
         </div>
-    </div>
+    </main>
 </body>
 </html>
