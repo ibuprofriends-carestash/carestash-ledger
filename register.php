@@ -1,78 +1,72 @@
 <?php
-require_once __DIR__ . '/includes/session.php';
+session_start();
 require_once __DIR__ . '/config/database.php';
 
-if (isset($_SESSION['user_id'])) {
-    header('Location: dashboard.php');
-    exit;
-}
-
 $errors = [];
-$form = [
-    'full_name' => '',
-    'email' => '',
-    'username' => '',
-    'password' => '',
-    'confirm_password' => '',
-];
+$form = ['full_name' => '', 'email' => '', 'username' => ''];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    foreach ($form as $key => $value) {
-        $form[$key] = trim($_POST[$key] ?? '');
-    }
+    $form['full_name'] = trim($_POST['full_name'] ?? '');
+    $form['email']     = trim($_POST['email'] ?? '');
+    $form['username']  = trim($_POST['username'] ?? '');
+    $password          = $_POST['password'] ?? '';
+    $confirm           = $_POST['confirm_password'] ?? '';
 
+    // Validation
     if ($form['full_name'] === '') {
         $errors[] = 'Full name is required.';
     }
-
-    if ($form['email'] === '') {
-        $errors[] = 'Email is required.';
-    } elseif (!filter_var($form['email'], FILTER_VALIDATE_EMAIL)) {
+    if (!filter_var($form['email'], FILTER_VALIDATE_EMAIL)) {
         $errors[] = 'Please enter a valid email address.';
-    } else {
-        $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
-        $stmt->execute([$form['email']]);
-        if ($stmt->fetch()) {
-            $errors[] = 'This email is already registered.';
-        }
     }
-
-    if ($form['username'] === '') {
-        $errors[] = 'Username is required.';
-    } else {
-        $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ?");
-        $stmt->execute([$form['username']]);
-        if ($stmt->fetch()) {
-            $errors[] = 'This username is already taken.';
-        }
+    if (!preg_match('/^[A-Za-z0-9_.]{3,30}$/', $form['username'])) {
+        $errors[] = 'Username must be 3-30 characters (letters, numbers, underscores, dots).';
     }
-
-    if ($form['password'] === '') {
-        $errors[] = 'Password is required.';
-    } elseif (strlen($form['password']) < 6) {
-        $errors[] = 'Password must be at least 6 characters long.';
+    if (strlen($password) < 8) {
+        $errors[] = 'Password must be at least 8 characters.';
     }
-
-    if ($form['confirm_password'] !== $form['password']) {
+    if ($password !== $confirm) {
         $errors[] = 'Passwords do not match.';
     }
 
+    // Check for existing email/username using PDO
     if (empty($errors)) {
-        $hashedPassword = password_hash($form['password'], PASSWORD_BCRYPT);
-
-        $stmt = $pdo->prepare(
-            "INSERT INTO users (full_name, email, username, password, role, status) VALUES (?, ?, ?, ?, 'User', 'Active')"
-        );
-        $stmt->execute([
-            $form['full_name'],
-            $form['email'],
-            $form['username'],
-            $hashedPassword,
+        $check = $pdo->prepare("SELECT email, username FROM users WHERE email = :email OR username = :username");
+        $check->execute([
+            ':email'    => $form['email'],
+            ':username' => $form['username']
         ]);
+        $rows = $check->fetchAll(PDO::FETCH_ASSOC);
 
-        $_SESSION['flash_message'] = 'Registration successful. Please log in.';
-        header('Location: login.php');
-        exit;
+        foreach ($rows as $row) {
+            if (strcasecmp($row['email'], $form['email']) === 0) {
+                $errors[] = 'That email is already registered.';
+            }
+            if (strcasecmp($row['username'], $form['username']) === 0) {
+                $errors[] = 'That username is already taken.';
+            }
+        }
+    }
+
+    // Insert user with role automatically set to 'patient'
+    if (empty($errors)) {
+        $hashed = password_hash($password, PASSWORD_DEFAULT);
+        $role = "User"; // Automatically set role to user
+
+        $insert = $pdo->prepare("INSERT INTO users (full_name, email, username, password, role) VALUES (:full_name, :email, :username, :password, :role)");
+        
+        if ($insert->execute([
+            ':full_name' => $form['full_name'],
+            ':email'     => $form['email'],
+            ':username'  => $form['username'],
+            ':password'  => $hashed,
+            ':role'      => $role
+        ])) {
+            echo "<script>alert('Account created! You can now sign in.'); window.location='index.php';</script>";
+            exit();
+        } else {
+            $errors[] = 'Something went wrong while creating your account. Please try again.';
+        }
     }
 }
 ?>
@@ -126,7 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
 
         <div class="text-center mt-3">
-            <p class="mb-0">Already have an account? <a href="login.php">Sign in</a></p>
+            <p class="mb-0">Already have an account? <a href="index.php">Sign in</a></p>
         </div>
     </main>
 </body>
