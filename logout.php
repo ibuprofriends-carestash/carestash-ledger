@@ -1,7 +1,8 @@
 <?php
-require_once __DIR__ . '/includes/session.php';
-
-session_unset();
-session_destroy();
-header('Location: login.php');
-exit;
+    require_once __DIR__ . '/config/database.php';
+    session_start();
+    session_unset();
+    session_destroy();
+    header("location: index.php");
+    exit();
+?>
