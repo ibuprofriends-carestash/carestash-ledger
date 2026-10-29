@@ -2,7 +2,7 @@
 session_start();
 
 // Ensure the user is logged in and has a patient/user role
-if (!isset($_SESSION['USERID']) || ($_SESSION['ROLE'] !== 'patient' && $_SESSION['ROLE'] !== 'User')) {
+if (!isset($_SESSION['USERID']) || ($_SESSION['ROLE'] !== 'Patient' && $_SESSION['ROLE'] !== 'User')) {
     header("location: ../index.php");
     exit();
 }
@@ -24,8 +24,9 @@ if (!isset($_SESSION['USERID']) || ($_SESSION['ROLE'] !== 'patient' && $_SESSION
             <a class="navbar-brand fw-bold" href="#">CareStash Health</a>
             <div class="d-flex align-items-center">
                 <span class="text-white me-3 small">
-                    Logged in as: <strong><?= htmlspecialchars($_SESSION['USERNAME'] ?? 'Patient') ?></strong>
+                    Logged in as: <strong><?= ucwords(strtolower(htmlspecialchars($_SESSION['USERNAME'] ?? 'Patient'))) ?></strong>
                 </span>
+                <a href="../profile.php" class="btn btn-outline-light btn-sm me-2">Account Settings</a>
                 <a href="../logout.php" class="btn btn-outline-light btn-sm">Sign out</a>
             </div>
         </div>
