@@ -1,0 +1,6 @@
+<h2>VIP Attendees</h2>
+<ul>
+  <li *ngFor="let vip of vips">
+    {{vip.name}} ({{vip.age}}) — {{vip.campusOrWorkplace}}, Invited by: {{vip.invitedBy}}, Cell group: {{vip.hasCellGroup ? 'Yes' : 'No'}}
+  </li>
+</ul>

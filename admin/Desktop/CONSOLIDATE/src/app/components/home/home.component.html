@@ -1,0 +1,20 @@
+<h2>Enter Attendee Information</h2>
+<form (ngSubmit)="submit()">
+  <div><input name="name" placeholder="Name" [(ngModel)]="model.name"></div>
+  <div><input type="number" name="age" placeholder="Age" [(ngModel)]="model.age"></div>
+  <div><input name="campusOrWorkplace" placeholder="Campus or Workplace" [(ngModel)]="model.campusOrWorkplace"></div>
+  <div><input name="invitedBy" placeholder="Invited By" [(ngModel)]="model.invitedBy"></div>
+  <div>
+    <label>Status:</label>
+    <select [(ngModel)]="model.status" name="status">
+      <option value="VIP">VIP</option>
+      <option value="Regular">Regular</option>
+    </select>
+  </div>
+  <div>
+    <label>
+      <input type="checkbox" [(ngModel)]="model.hasCellGroup" name="cell"> Already has a Cell Group
+    </label>
+  </div>
+  <div><button type="submit">Enter</button></div>
+</form>

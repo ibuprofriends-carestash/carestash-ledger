@@ -1,0 +1,37 @@
+a website na masstore yung data ng mga user, sa home page ieenter ng user is name,age,campus or workplace, sino nag invite, 
+kung anong status nila VIP or Regular attendee, 
+and merong selection bar/icon na pwedeng mamimili if meron ng cell or wala pa. then pag clinick yung enter mapupunta siya kung saaan siya category if VIP,
+or regular atendees na siya.kapag inenter ni user na isa siyang regular attendees mapupunta sa another webpage and nakalist na yung mga name ng 
+regular attendees kasama na yung mga data na na-store sa mga ineenter ni user, ganon din kapag VIP si user, same sila sa regular. and meron dapat isang webpage 
+na si admin lang makakita lahat ng data vip or Regular attendees, basta all the data na na-store ni user. give me the code using the 
+typescript angular version 2020
+
+
+
+Here’s the English translation of your description:
+
+---
+
+A website that stores user data.
+On the **Home page**, the user will enter their:
+
+* Name
+* Age
+* Campus or Workplace
+* Who invited them
+* Their status (VIP or Regular attendee)
+* A selection option (dropdown or icon) where they can choose if they already have a cell group or not.
+
+When they click **Enter**, their data will be stored and categorized:
+
+* If the user selects **VIP**, they will be listed under the VIP category.
+* If the user selects **Regular attendee**, they will be listed under the Regular attendees category.
+
+Each category (VIP or Regular attendees) has its own webpage where the names and information of all users in that category are displayed.
+
+In addition, there should be an **Admin-only webpage** where the admin can view **all stored data**, both VIP and Regular attendees, in one place.
+
+---
+
+👉 Do you want me to **add this functionality** into the Angular project I made earlier (Home + About + Contact + Admin), or do you prefer I create a **new simpler project** just focused on this user/attendee registration and admin view?
+
