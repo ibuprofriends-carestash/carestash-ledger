@@ -200,8 +200,10 @@ include __DIR__ . '/includes/header.php';
                     <option value="Inactive" <?= $form['status'] === 'Inactive' ? 'selected' : '' ?>>Inactive</option>
                 </select>
             </div>
-            <div class="col-12">
-                <label class="form-label" for="patient_id">Linked patient record</label>
+            <div class="col-12" id="patient-link">
+                <h4 class="h5 mb-2">Link to patient record</h4>
+                <p class="text-muted small">Link this user account to a patient record to grant access to that patient's notes and care information.</p>
+                <label class="form-label" for="patient_id">Patient record</label>
                 <select id="patient_id" name="patient_id" class="form-select">
                     <option value="">No patient record linked</option>
                     <?php foreach ($availablePatients as $patient): ?>
@@ -210,7 +212,7 @@ include __DIR__ . '/includes/header.php';
                         </option>
                     <?php endforeach; ?>
                 </select>
-                <div class="form-text">Only this account will be able to see the linked patient's records and appointments.</div>
+                <div class="form-text">A patient record can only be linked to one user account. Only this account will be able to see the linked patient's records and appointments.</div>
             </div>
         </div>
 

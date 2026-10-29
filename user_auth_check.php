@@ -1,6 +1,11 @@
 <?php
 require_once __DIR__ . '/includes/session.php';
 
+if (!isset($_SESSION['user_id']) && isset($_SESSION['USERID'])) {
+    $_SESSION['user_id'] = (int)$_SESSION['USERID'];
+    $_SESSION['user_username'] = $_SESSION['USERNAME'] ?? '';
+}
+
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit;

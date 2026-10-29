@@ -33,8 +33,8 @@ A PHP + MySQL (PDO) admin panel for managing patient health records, built for X
    Change it there if your setup differs.
 
 5. **Open the app**
-   Visit `http://localhost/health_records/` in your browser. It will redirect you to the
-   admin login page.
+   Visit `http://localhost/health_records/` for the patient/user sign-in page. For the
+   administrator sign-in page, visit `http://localhost/health_records/admin/login.php`.
 
 ## Default Admin Login
 - **Username:** `admin`

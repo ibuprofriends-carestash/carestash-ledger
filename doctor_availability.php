@@ -105,6 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>My Availability - CareStash Health</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/css/medical.css" rel="stylesheet">
+    <script src="assets/js/medical-theme.js" defer></script>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark medical-navbar">

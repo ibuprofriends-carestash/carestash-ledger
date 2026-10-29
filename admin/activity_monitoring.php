@@ -38,7 +38,7 @@ if ($isExport) {
 
 if ($isExport):
 ?><!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><title>Audit Report</title><link href="../assets/css/medical.css" rel="stylesheet"><style>@media print {.no-print{display:none!important}} body{padding:2rem}.table{font-size:.85rem}</style></head><body>
+<html lang="en"><head><meta charset="UTF-8"><title>Audit Report</title><link href="../assets/css/medical.css" rel="stylesheet"><script src="../assets/js/medical-theme.js" defer></script><style>@media print {.no-print{display:none!important}} body{padding:2rem}.table{font-size:.85rem}</style></head><body>
 <div class="d-flex justify-content-between align-items-center mb-4"><div><p class="text-success text-uppercase fw-semibold small mb-1">CareStash Health</p><h1>Audit report</h1><p>Generated <?= htmlspecialchars(gmdate('Y-m-d H:i:s')) ?> UTC · <?= count($logs) ?> activities</p></div><button class="btn btn-primary no-print" onclick="window.print()">Print</button></div>
 <h2>Summary</h2><p><?= count($logs) ?> activities recorded.</p>
 <div class="row"><div class="col-md-6"><h3>By action</h3><ul><?php foreach ($summaryByAction as $action => $count): ?><li><?= htmlspecialchars($action) ?>: <?= $count ?></li><?php endforeach; ?></ul></div><div class="col-md-6"><h3>By user</h3><ul><?php foreach ($summaryByUser as $user => $count): ?><li><?= htmlspecialchars($user) ?>: <?= $count ?></li><?php endforeach; ?></ul></div></div>

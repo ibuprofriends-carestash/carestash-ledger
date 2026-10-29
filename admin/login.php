@@ -40,11 +40,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Admin Login - Health Records</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="../assets/css/medical.css" rel="stylesheet">
+    <script src="../assets/js/medical-theme.js" defer></script>
 </head>
 <body class="medical-login-page">
     <main class="medical-login-card">
         <div class="text-center">
-            <span class="medical-login-mark" aria-hidden="true">🩺</span>
             <p class="text-success fw-semibold text-uppercase small mb-1">CareStash Health</p>
             <h1 class="h3 mb-2">Administrator sign in</h1>
             <p class="text-muted mb-4">Manage patient records and clinic visits.</p>

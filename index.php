@@ -10,6 +10,7 @@ require_once __DIR__ . '/config/database.php';
     <title>Sign In - CareStash Health</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/css/medical.css" rel="stylesheet">
+    <script src="assets/js/medical-theme.js" defer></script>
 </head>
 <body class="medical-login-page">
     <main class="medical-login-card">
@@ -40,6 +41,9 @@ require_once __DIR__ . '/config/database.php';
 
         <div class="text-center mt-3">
             <p class="mb-0">Don't have an account? <a href="register.php">Create an account</a></p>
+        </div>
+        <div class="text-center mt-3">
+            <a href="admin/login.php" class="small text-decoration-none">Administrator sign in</a>
         </div>
     </main>
 </body>

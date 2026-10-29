@@ -69,6 +69,7 @@ if (empty($_SESSION['csrf_token'])) {
     <title>My Health Records - CareStash</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/css/medical.css" rel="stylesheet">
+    <script src="assets/js/medical-theme.js" defer></script>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark medical-navbar">
@@ -87,8 +88,11 @@ if (empty($_SESSION['csrf_token'])) {
         </div>
     </nav>
 
-    <main class="container py-4 py-lg-5">
-        <div class="profile-banner mb-4">
+    <main class="container health-dashboard py-4 py-lg-5">
+        <div class="mb-3">
+            <a href="patients/index.php" class="btn btn-outline-primary">&larr; Back to home</a>
+        </div>
+        <div class="profile-banner health-welcome mb-4">
             <div class="d-flex align-items-center gap-3">
                 <span class="profile-avatar" aria-hidden="true"><?= htmlspecialchars($initials) ?></span>
                 <div>
@@ -98,7 +102,7 @@ if (empty($_SESSION['csrf_token'])) {
                 </div>
             </div>
         </div>
-        <div class="row g-3 mb-5">
+        <div class="row g-3 mb-5 account-summary">
             <?php foreach ([
                 'Username' => $user['username'],
                 'Email' => $user['email'],
@@ -114,16 +118,19 @@ if (empty($_SESSION['csrf_token'])) {
             <?php endforeach; ?>
         </div>
 
-        <section class="mb-5" id="my-records">
+        <section class="health-section mb-5" id="my-records">
             <h2 class="h4 section-heading">My medical records</h2>
             <?php if (!$patient): ?>
-                <div class="alert alert-info">Your account is not yet linked to a patient record. Please contact the clinic to verify and link your account.</div>
+                <div class="alert alert-info">
+                    <span id="appointments"></span><span id="prescriptions"></span>
+                    Your account is not yet linked to a patient record. Please contact the clinic to verify and link your account.
+                </div>
             <?php else: ?>
                 <?php
                 $patientNameParts = preg_split('/\s+/', trim($patient['full_name']));
                 $patientInitials = strtoupper(substr($patientNameParts[0] ?? '', 0, 1) . substr($patientNameParts[count($patientNameParts) - 1] ?? '', 0, 1));
                 ?>
-                <div class="profile-banner mb-3">
+                <div class="profile-banner patient-record-banner mb-3">
                     <div class="d-flex align-items-center gap-3">
                         <span class="profile-avatar" aria-hidden="true"><?= htmlspecialchars($patientInitials) ?></span>
                         <div>
@@ -134,7 +141,7 @@ if (empty($_SESSION['csrf_token'])) {
                     </div>
                 </div>
 
-                <article class="card p-3 p-md-4 mb-4">
+                <article class="card patient-info-card p-3 p-md-4 mb-4">
                     <h3 class="h5 section-heading">Personal information</h3>
                     <div class="row g-3">
                             <?php foreach ([
@@ -161,7 +168,7 @@ if (empty($_SESSION['csrf_token'])) {
                             'Clinical notes' => $patient['notes'],
                         ] as $label => $value): ?>
                             <div class="col-md-6">
-                                <article class="card h-100 p-3">
+                                <article class="card clinical-info-card h-100 p-3" <?= $label === 'Medications' ? 'id="prescriptions"' : '' ?>>
                                     <h4 class="h6"><?= htmlspecialchars($label) ?></h4>
                                     <div><?= $value !== null && trim((string)$value) !== '' ? nl2br(htmlspecialchars($value)) : '<span class="text-muted">Not recorded</span>' ?></div>
                                 </article>
@@ -174,7 +181,7 @@ if (empty($_SESSION['csrf_token'])) {
                 <section id="appointments" class="mb-4">
                 <h3 class="h5 section-heading">Appointments</h3>
                 <?php if ($appointments): ?>
-                    <div class="card p-3 table-responsive mb-4">
+                    <div class="card health-table-card p-3 table-responsive mb-4">
                         <table class="table table-hover align-middle bg-white">
                             <thead><tr><th>Date and time</th><th>Type</th><th>Doctor</th><th>Status</th><th>Details</th></tr></thead>
                             <tbody>
@@ -191,13 +198,13 @@ if (empty($_SESSION['csrf_token'])) {
                         </table>
                     </div>
                 <?php else: ?>
-                    <div class="card p-3 text-muted">No appointments are currently linked to your record.</div>
+                    <div class="dashboard-empty mb-4"><span class="dashboard-empty-icon" aria-hidden="true">i</span><p>No appointments are currently linked to your record.</p></div>
                 <?php endif; ?>
                 </section>
 
                 <?php if ($labRequests): ?>
                     <h3 class="h5 section-heading">Laboratory requests</h3>
-                    <div class="card p-3 table-responsive mb-4">
+                    <div class="card health-table-card p-3 table-responsive mb-4">
                         <table class="table table-hover align-middle bg-white">
                             <thead><tr><th>Requested</th><th>Clinician</th><th>Status</th><th>Tests</th><th>Clinical indication</th></tr></thead>
                             <tbody>
@@ -215,13 +222,13 @@ if (empty($_SESSION['csrf_token'])) {
                     </div>
                 <?php else: ?>
                     <h3 class="h5 section-heading">Laboratory requests</h3>
-                    <div class="card p-3 text-muted mb-4">No laboratory requests are linked to your record.</div>
+                    <div class="dashboard-empty mb-4"><span class="dashboard-empty-icon" aria-hidden="true">i</span><p>No laboratory requests are linked to your record.</p></div>
                 <?php endif; ?>
 
                 <?php if ($certificates): ?>
                     <h3 class="h5 section-heading">Medical certificates</h3>
                     <?php foreach ($certificates as $certificate): ?>
-                        <article class="border rounded p-3 mb-3 bg-white">
+                        <article class="health-certificate border rounded p-3 mb-3 bg-white">
                             <div class="d-flex justify-content-between flex-wrap gap-2">
                                 <strong>Examination date: <?= htmlspecialchars($certificate['examination_date']) ?></strong>
                                 <span class="text-muted">Issued <?= htmlspecialchars($certificate['issued_at']) ?></span>
@@ -237,14 +244,14 @@ if (empty($_SESSION['csrf_token'])) {
                     <?php endforeach; ?>
                 <?php else: ?>
                     <h3 class="h5 section-heading">Medical certificates</h3>
-                    <div class="card p-3 text-muted mb-4">No medical certificates are linked to your record.</div>
+                    <div class="dashboard-empty mb-4"><span class="dashboard-empty-icon" aria-hidden="true">i</span><p>No medical certificates are linked to your record.</p></div>
                 <?php endif; ?>
 
                 <?php if ($history): ?>
                     <h3 class="h5 section-heading">Record history</h3>
                     <div class="record-timeline mb-4">
                         <?php foreach ($history as $version): $snapshot = json_decode($version['snapshot'], true) ?: []; ?>
-                            <details class="record-timeline-item card p-3 mb-3">
+                            <details class="record-timeline-item health-history-item card p-3 mb-3">
                                 <summary class="fw-semibold"><?= htmlspecialchars(date('M j, Y g:i A', strtotime($version['changed_at']))) ?></summary>
                                 <div class="row pt-3">
                                     <?php foreach (['diagnosis' => 'Diagnosis', 'allergies' => 'Allergies', 'medications' => 'Medications', 'notes' => 'Notes'] as $key => $label): ?>
@@ -256,18 +263,18 @@ if (empty($_SESSION['csrf_token'])) {
                     </div>
                 <?php else: ?>
                     <h3 class="h5 section-heading">Record history</h3>
-                    <div class="card p-3 text-muted mb-4">There are no previous saved versions of this record.</div>
+                    <div class="dashboard-empty mb-4"><span class="dashboard-empty-icon" aria-hidden="true">i</span><p>There are no previous saved versions of this record.</p></div>
                 <?php endif; ?>
             <?php endif; ?>
         </section>
 
-        <section class="mt-5 mb-4" id="doctors">
+        <section class="health-section doctor-availability-section mt-5 mb-4" id="doctors">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2 class="h4 section-heading mb-0">Doctor availability</h2>
                 <?php if ($user['role'] === 'Doctor'): ?><a href="doctor_availability.php" class="btn btn-outline-primary btn-sm">Update my status</a><?php endif; ?>
             </div>
             <?php if ($doctors): ?>
-                <div class="table-responsive">
+                <div class="card health-table-card p-3 table-responsive">
                     <table class="table table-hover align-middle bg-white">
                         <thead><tr><th>Doctor</th><th>Status</th><th>Clinic</th><th>Regular hours</th><th>Updates</th></tr></thead>
                         <tbody>
@@ -299,10 +306,13 @@ if (empty($_SESSION['csrf_token'])) {
                     </table>
                 </div>
             <?php else: ?>
-                <p class="text-muted">No doctor availability has been posted yet.</p>
+                <div class="dashboard-empty"><span class="dashboard-empty-icon" aria-hidden="true">i</span><p>No doctor availability has been posted yet.</p></div>
             <?php endif; ?>
             <p class="small text-muted">Availability is maintained by doctors and may change. Contact the clinic to confirm before visiting. Public updates should not include sensitive personal details.</p>
         </section>
+        <div class="mt-4 mb-3">
+            <a href="patients/index.php" class="btn btn-outline-primary">&larr; Back to home</a>
+        </div>
     </main>
 </body>
 </html>

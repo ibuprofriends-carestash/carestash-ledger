@@ -56,6 +56,7 @@ $dashboardLink = ($role === 'doctor') ? 'doctor/index.php' : (($role === 'admin'
     <title>User Profile - CareStash Health</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/css/medical.css" rel="stylesheet">
+    <script src="assets/js/medical-theme.js" defer></script>
 </head>
 <body class="bg-light">
 

@@ -15,14 +15,15 @@ if (!isset($_SESSION['USERID']) || ($_SESSION['ROLE'] !== 'Patient' && $_SESSION
     <title>Patient Dashboard - CareStash Health</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="../assets/css/medical.css" rel="stylesheet">
+    <script src="../assets/js/medical-theme.js" defer></script>
 </head>
 <body class="bg-light">
 
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-success shadow-sm mb-4">
-        <div class="container">
+        <div class="container-fluid px-3 px-lg-4 portal-navbar-content">
             <a class="navbar-brand fw-bold" href="#">CareStash Health</a>
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center portal-navbar-actions">
                 <span class="text-white me-3 small">
                     Logged in as: <strong><?= ucwords(strtolower(htmlspecialchars($_SESSION['USERNAME'] ?? 'Patient'))) ?></strong>
                 </span>
@@ -45,24 +46,24 @@ if (!isset($_SESSION['USERID']) || ($_SESSION['ROLE'] !== 'Patient' && $_SESSION
 
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <div class="p-3 border rounded bg-white shadow-sm">
+                                <div class="portal-feature">
                                     <h5 class="h6 text-dark fw-bold">My Medical Records</h5>
                                     <p class="text-muted small mb-2">View your clinical history and notes.</p>
-                                    <a href="#" class="btn btn-sm btn-outline-success">View Records</a>
+                                    <a href="../dashboard.php#my-records" class="btn btn-sm btn-outline-success">View Records</a>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="p-3 border rounded bg-white shadow-sm">
+                                <div class="portal-feature">
                                     <h5 class="h6 text-dark fw-bold">Prescriptions</h5>
                                     <p class="text-muted small mb-2">Check active medication profiles.</p>
-                                    <a href="#" class="btn btn-sm btn-outline-success">View Prescriptions</a>
+                                    <a href="../dashboard.php#prescriptions" class="btn btn-sm btn-outline-success">View Prescriptions</a>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="p-3 border rounded bg-white shadow-sm">
+                                <div class="portal-feature">
                                     <h5 class="h6 text-dark fw-bold">Appointments</h5>
                                     <p class="text-muted small mb-2">Check upcoming doctor visits.</p>
-                                    <a href="#" class="btn btn-sm btn-outline-success">View Schedule</a>
+                                    <a href="../dashboard.php#appointments" class="btn btn-sm btn-outline-success">View Schedule</a>
                                 </div>
                             </div>
                         </div>

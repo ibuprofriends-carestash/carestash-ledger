@@ -15,6 +15,7 @@ if (!isset($_SESSION['USERID']) || $_SESSION['ROLE'] !== 'Doctor') {
     <title>Doctor Portal - CareStash Health</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="../assets/css/medical.css" rel="stylesheet">
+    <script src="../assets/js/medical-theme.js" defer></script>
 </head>
 <body class="bg-light">
 
@@ -45,21 +46,21 @@ if (!isset($_SESSION['USERID']) || $_SESSION['ROLE'] !== 'Doctor') {
 
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <div class="p-3 border rounded bg-white shadow-sm">
+                                <div class="portal-feature">
                                     <h5 class="h6 text-dark fw-bold">Patient Records</h5>
                                     <p class="text-muted small mb-2">Access patient histories and case files.</p>
                                     <a href="#" class="btn btn-sm btn-outline-success">View Patients</a>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="p-3 border rounded bg-white shadow-sm">
+                                <div class="portal-feature">
                                     <h5 class="h6 text-dark fw-bold">Prescription Manager</h5>
                                     <p class="text-muted small mb-2">Issue or update medication profiles.</p>
                                     <a href="#" class="btn btn-sm btn-outline-success">Manage Prescriptions</a>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="p-3 border rounded bg-white shadow-sm">
+                                <div class="portal-feature">
                                     <h5 class="h6 text-dark fw-bold">Appointment Schedule</h5>
                                     <p class="text-muted small mb-2">Check your upcoming clinic hours.</p>
                                     <a href="#" class="btn btn-sm btn-outline-success">View Schedule</a>
