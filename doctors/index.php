@@ -26,6 +26,7 @@ if (!isset($_SESSION['USERID']) || $_SESSION['ROLE'] !== 'Doctor') {
                 <span class="text-white me-3 small">
                     Dr. <strong><?= ucwords(strtolower(htmlspecialchars($_SESSION['USERNAME'] ?? 'Doctor'))) ?></strong>
                 </span>
+                <a href="../profile.php" class="btn btn-outline-light btn-sm me-2">Account Settings</a>
                 <a href="../logout.php" class="btn btn-outline-light btn-sm">Sign out</a>
             </div>
         </div>
